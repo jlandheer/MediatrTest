@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true
+  },
+
+  "dependencies": {
+    "FluentValidation": "6.2.1",
+    "MediatR": "2.1.0",
+    "SimpleInjector": "3.3.2"
+  },
+
+  "frameworks": {
+    "net461": {}
+  }
+}
