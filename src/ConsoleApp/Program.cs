@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using System;
+using System.Reflection;
 using ConsoleApp.Commands;
 using ConsoleApp.Decorators;
 using FluentValidation;
@@ -11,15 +12,16 @@ namespace ConsoleApp
     {
         public static void Main(string[] args)
         {
+            var assemblies = new[] { Assembly.GetExecutingAssembly() };
             var container = new Container();
 
             container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
             container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
             container.Register<IMediator, Mediator>(Lifestyle.Singleton);
 
-            container.RegisterCollection(typeof(IValidator<>));
-            container.Register(typeof(IRequestHandler<,>));
-            container.RegisterCollection(typeof(INotificationHandler<>));
+            container.RegisterCollection(typeof(IValidator<>), assemblies);
+            container.Register(typeof(IRequestHandler<,>), assemblies);
+            container.RegisterCollection(typeof(INotificationHandler<>), assemblies);
             container.RegisterDecorator(typeof(IRequestHandler<,>), typeof(ValidationDecorator<>));
             container.RegisterDecorator(typeof(IRequestHandler<,>), typeof(AuthorizationDecorator<>));
 
@@ -36,6 +38,7 @@ namespace ConsoleApp
                 Console.WriteLine($"Test : {res.IsValid}");
             }
             Console.WriteLine("bye...");
+            Console.ReadKey();
         }
     }
 }
