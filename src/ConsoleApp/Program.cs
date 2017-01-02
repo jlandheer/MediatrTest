@@ -15,9 +15,9 @@ namespace ConsoleApp
             var assemblies = new[] { Assembly.GetExecutingAssembly() };
             var container = new Container();
 
+            container.Register<IMediator, Mediator>(Lifestyle.Singleton);
             container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
             container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
-            container.Register<IMediator, Mediator>(Lifestyle.Singleton);
 
             container.RegisterCollection(typeof(IValidator<>), assemblies);
             container.Register(typeof(IRequestHandler<,>), assemblies);

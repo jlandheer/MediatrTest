@@ -20,7 +20,7 @@ namespace ConsoleApp.Decorators
 
         public override CommandResult Handle(TRequest message)
         {
-            Console.WriteLine($"Validating Ping ({typeof(TRequest)}) with {_validators.Length} validators");
+            Console.WriteLine($"Validating ({typeof(TRequest)}) with {_validators.Length} validators");
             var context = new ValidationContext(message);
 
             var failures = _validators
@@ -30,7 +30,9 @@ namespace ConsoleApp.Decorators
                 .ToList();
 
             if (failures.Any())
+            {
                 return new CommandResult(failures.Select(i => i.ErrorMessage));
+            }
 
             return _next.Handle(message);
         }

@@ -15,8 +15,6 @@ namespace ConsoleApp.Decorators
 
         public override CommandResult Handle(TRequest message)
         {
-            Console.WriteLine($"Authorizing Ping ({typeof(TRequest)})");
-
             return _next.Handle(message);
         }
     }
