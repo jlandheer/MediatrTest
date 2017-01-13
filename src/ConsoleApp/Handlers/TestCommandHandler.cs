@@ -1,13 +1,15 @@
-﻿using ConsoleApp.Commands;
+﻿using System.Threading.Tasks;
+using ConsoleApp.Commands;
 using ConsoleApp.Infrastructure;
+using MediatR;
 
 namespace ConsoleApp.Handlers
 {
-    public class TestCommandHandler : CommandHandler<TestCommand>
+    public class TestCommandHandler : ICommandHandler<TestCommand>
     {
-        public override CommandResult Handle(TestCommand message)
+        public Task<Unit> Handle(TestCommand message)
         {
-            return new CommandResult();
+            return Unit.Task;
         }
     }
 }

@@ -1,19 +1,20 @@
 ﻿using System;
+using System.Threading.Tasks;
 using ConsoleApp.Infrastructure;
 using MediatR;
 
 namespace ConsoleApp.Decorators
 {
-    public class AuthorizationDecorator<TRequest> : CommandHandler<TRequest> where TRequest : Command
+    public class AuthorizationDecorator<TRequest> : ICommandHandler<TRequest> where TRequest : ICommand
     {
-        private readonly IRequestHandler<TRequest, CommandResult> _next;
+        private readonly IAsyncRequestHandler<TRequest, Unit> _next;
 
-        public AuthorizationDecorator(IRequestHandler<TRequest, CommandResult> next)
+        public AuthorizationDecorator(IAsyncRequestHandler<TRequest, Unit> next)
         {
             _next = next;
         }
 
-        public override CommandResult Handle(TRequest message)
+        public Task<Unit> Handle(TRequest message)
         {
             return _next.Handle(message);
         }
