@@ -1,5 +1,4 @@
 ﻿using ConsoleApp.Infrastructure;
-using MediatR;
 
 namespace ConsoleApp.Commands
 {

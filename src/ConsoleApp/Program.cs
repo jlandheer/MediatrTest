@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using ConsoleApp.Commands;
 using ConsoleApp.Decorators;
 using FluentValidation;
@@ -49,15 +50,20 @@ namespace ConsoleApp
                 commandBus.Send(new TestCommand { Message = message }).Wait();
 
                 var query = queryBus.Get(new TestQuery { Message = message }).Result;
-                Console.WriteLine($"Command : {query}");
+                Console.WriteLine($"Query : {query.Message}");
             }
             Console.WriteLine("bye...");
             Console.ReadKey();
         }
     }
 
-    public class TestQueryHandler : IQueryHandler<TestQuery>
+    public class TestQueryHandler : IQueryHandler<TestQuery, TestQueryResult>
     {
+        public Task<TestQueryResult> Handle(TestQuery query)
+        {
+            Console.WriteLine("Query");
+            return Task.FromResult(new TestQueryResult {Message = (query.Message ?? "") + "Result"});
+        }
     }
 
     public class TestQuery : IQuery<TestQueryResult>
@@ -67,5 +73,6 @@ namespace ConsoleApp
 
     public class TestQueryResult
     {
+        public string Message { get; set; }
     }
 }

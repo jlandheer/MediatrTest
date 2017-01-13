@@ -15,12 +15,12 @@ namespace ConsoleApp.Infrastructure
 
         public Task Send(ICommand command, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _mediator.Send(command, cancellationToken);
+            return _mediator.SendAsync(command, cancellationToken);
         }
 
         public Task<TResult> Get<TResult>(IQuery<TResult> query, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _mediator.Send(query, cancellationToken);
+            return _mediator.SendAsync(query, cancellationToken);
         }
     }
 }
