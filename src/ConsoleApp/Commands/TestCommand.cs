@@ -2,7 +2,7 @@
 
 namespace ConsoleApp.Commands
 {
-    public class TestCommand : Command
+    public class TestCommand : ICommand
     {
         public string Message { get; set; }
     }

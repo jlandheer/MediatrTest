@@ -2,8 +2,10 @@
 
 namespace ConsoleApp.Infrastructure
 {
-    public abstract class CommandHandler<TRequest> : IRequestHandler<TRequest, CommandResult> where TRequest : Command
+    public interface ICommandHandler<in TRequest> : IAsyncRequestHandler<TRequest, CommandResult> where TRequest : ICommand
     {
-        public abstract CommandResult Handle(TRequest message);
+    }
+    public interface ICommandDecorator<in TRequest> : IAsyncRequestHandler<TRequest, CommandResult> where TRequest : ICommand
+    {
     }
 }

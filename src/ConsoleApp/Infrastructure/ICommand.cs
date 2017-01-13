@@ -2,7 +2,7 @@
 
 namespace ConsoleApp.Infrastructure
 {
-    public abstract class Command : IRequest<CommandResult>
+    public interface ICommand : IRequest<CommandResult>
     {
     }
 }

@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using ConsoleApp.Infrastructure;
 using FluentValidation;
 using MediatR;
 
 namespace ConsoleApp.Decorators
 {
-    public class ValidationDecorator<TRequest> : CommandHandler<TRequest> where TRequest : Command
+    public class ValidationDecorator<TRequest> : ICommandDecorator<TRequest> where TRequest : ICommand
     {
-        private readonly IRequestHandler<TRequest, CommandResult> _next;
+        private readonly IAsyncRequestHandler<TRequest, CommandResult> _next;
         private readonly IValidator<TRequest>[] _validators;
 
-        public ValidationDecorator(IRequestHandler<TRequest, CommandResult> next, IValidator<TRequest>[] validators)
+        public ValidationDecorator(IAsyncRequestHandler<TRequest, CommandResult> next, IValidator<TRequest>[] validators)
         {
             _next = next;
             _validators = validators;
             Console.WriteLine($"Init Validation met {validators.Length} validators");
         }
 
-        public override CommandResult Handle(TRequest message)
+        public Task<CommandResult> Handle(TRequest message)
         {
             Console.WriteLine($"Validating ({typeof(TRequest)}) with {_validators.Length} validators");
             var context = new ValidationContext(message);
@@ -31,7 +32,7 @@ namespace ConsoleApp.Decorators
 
             if (failures.Any())
             {
-                return new CommandResult(failures.Select(i => i.ErrorMessage));
+                return CommandResult.FailedTask(failures.Select(i => i.ErrorMessage));
             }
 
             return _next.Handle(message);

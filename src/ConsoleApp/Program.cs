@@ -5,6 +5,7 @@ using ConsoleApp.Commands;
 using ConsoleApp.Decorators;
 using FluentValidation;
 using SimpleInjector;
+using ConsoleApp.Infrastructure;
 
 namespace ConsoleApp
 {
@@ -13,19 +14,30 @@ namespace ConsoleApp
         public static void Main(string[] args)
         {
             var assemblies = new[] { Assembly.GetExecutingAssembly() };
-            var container = new Container();
+            var commandQueryContainer = new Container();
 
-            container.Register<IMediator, Mediator>(Lifestyle.Singleton);
-            container.RegisterSingleton(new SingleInstanceFactory(container.GetInstance));
-            container.RegisterSingleton(new MultiInstanceFactory(container.GetAllInstances));
+            var mediator = new Mediator(commandQueryContainer.GetInstance, commandQueryContainer.GetAllInstances);
 
-            container.RegisterCollection(typeof(IValidator<>), assemblies);
-            container.Register(typeof(IRequestHandler<,>), assemblies);
-            container.RegisterCollection(typeof(INotificationHandler<>), assemblies);
-            container.RegisterDecorator(typeof(IRequestHandler<,>), typeof(ValidationDecorator<>));
-            container.RegisterDecorator(typeof(IRequestHandler<,>), typeof(AuthorizationDecorator<>));
+            var mediatorCommandQueryBus = new MediatorCommandBus(mediator);
+            commandQueryContainer.Register<ICommandBus>(() => mediatorCommandQueryBus, Lifestyle.Singleton);
+            commandQueryContainer.Register<IQueryBus>(() => mediatorCommandQueryBus, Lifestyle.Singleton);
 
-            var mediatr = container.GetInstance<IMediator>();
+            commandQueryContainer.Register(typeof(IAsyncRequestHandler<,>), assemblies);
+            commandQueryContainer.Register(typeof(ICancellableAsyncRequestHandler<>), assemblies);
+            commandQueryContainer.RegisterCollection(typeof(IValidator<>), assemblies);
+            commandQueryContainer.RegisterCollection(typeof(IPipelineBehavior<,>), assemblies);
+
+            commandQueryContainer.RegisterDecorator(typeof(IAsyncRequestHandler<,>), typeof(ValidationDecorator<>));
+            commandQueryContainer.RegisterDecorator(typeof(IAsyncRequestHandler<,>), typeof(AuthorizationDecorator<>));
+
+            // Voor de commandContainer worden geen Notificatie (Event) Handlers geregistreerd,
+            // Dat moet via de eventContainer.
+            commandQueryContainer.RegisterCollection(typeof(INotificationHandler<>));
+            commandQueryContainer.RegisterCollection(typeof(IAsyncNotificationHandler<>));
+            commandQueryContainer.RegisterCollection(typeof(ICancellableAsyncNotificationHandler<>));
+
+            var commandBus = commandQueryContainer.GetInstance<ICommandBus>();
+            var queryBus = commandQueryContainer.GetInstance<IQueryBus>();
 
             while (true)
             {
@@ -34,11 +46,22 @@ namespace ConsoleApp
                 if (message == "q")
                     break;
 
-                var res = mediatr.Send(new TestCommand2 { Message = message });
-                Console.WriteLine($"Test : {res.IsValid}");
+                var res = commandBus.Send(new TestCommand { Message = message }).Result;
+                Console.WriteLine($"Command : {res.IsValid}");
+                var query = queryBus.Get(new TestQuery { Message = message });
+                Console.WriteLine($"Command : {res.IsValid}");
             }
             Console.WriteLine("bye...");
             Console.ReadKey();
         }
+    }
+
+    public class TestQuery : IQuery<TestQueryResult>
+    {
+        public string Message { get; set; }
+    }
+
+    public class TestQueryResult
+    {
     }
 }
