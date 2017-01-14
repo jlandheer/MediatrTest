@@ -15,7 +15,7 @@ namespace ConsoleApp.Infrastructure
 
         public Task<CommandResult> Send(ICommand command, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _mediator.Send(command, cancellationToken);
+            return _mediator.SendAsync(command, cancellationToken);
         }
 
         public QueryResult<TResult> Get<TQuery, TResult>(TQuery query, CancellationToken cancellationToken = new CancellationToken()) where TQuery : IQuery<TResult>
